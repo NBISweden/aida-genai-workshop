@@ -9,6 +9,7 @@ services:
     volumes:
       - /usr/local/share/ca-certificates/verdi.crt:/usr/local/share/ca-certificates/verdi.crt
       - ./entrypoint.sh:/entrypoint.sh
+      - /mnt/shared_folder:/ComfyUI/models/checkpoints
     environment:
       - HTTP_PROXY=https://10.253.254.250:3130/
       - HTTPS_PROXY=https://10.253.254.250:3130/
