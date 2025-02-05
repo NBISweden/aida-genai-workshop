@@ -17,3 +17,10 @@ services:
       - REQUESTS_CA_BUNDLE=/usr/local/share/ca-certificates/verdi.crt
     entrypoint: ["/bin/bash", "/entrypoint.sh"]
     command: python3 main.py --listen 0.0.0.0 --port 8188
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
