@@ -66,3 +66,4 @@ EXPOSE 8188
 
 # Start ComfyUI with listening on all interfaces
 CMD ["python3", "main.py", "--listen", "0.0.0.0", "--port", "8188"]
+#CMD ["python3", "main.py",  "--listen", "0.0.0.0", "--port", "8188", "--cpu"]
