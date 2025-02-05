@@ -23,7 +23,36 @@ docker run --rm --gpus all nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04 nvidia-s
 
 2. Build the Docker image:
 ```bash
-docker build -t comfyui-workshop .
+docker build -t comfyui .
+```
+
+3. Run the container with NFS mount:
+```bash
+docker run -it --gpus all \
+  -p 8188:8188 \
+  -v /mnt/shared_folder:/ComfyUI/models/checkpoints \
+  comfyui
+```
+
+## Docker pipeline
+
+### Building the Image Locally
+
+1. Modify the Dockerfile to use CPU-only mode by changing the CMD line:
+```dockerfile
+CMD ["python3", "main.py", "--listen", "0.0.0.0", "--port", "8188", "--cpu"]
+```
+
+2. Build the image for your platform:
+
+**macOS(arm)**:
+```bash
+docker buildx build --platform=linux/amd64 -t comfyui:latest .
+```
+
+**Windows/Linux**:
+```powershell
+docker build -t comfyui:latest .
 ```
 
 3. Login to Docker registry:
@@ -35,35 +64,6 @@ docker login
 ```bash
 docker tag comfyui-workshop <your-registry>/comfyui-workshop:latest
 docker push <your-registry>/comfyui-workshop:latest
-```
-
-5. Run the container with NFS mount:
-```bash
-docker run -it --gpus all \
-  -p 8188:8188 \
-  -v /mnt/shared_folder:/ComfyUI/models/checkpoints \
-  comfyui-workshop
-```
-
-## Local Development Setup (CPU-only)
-
-### Building the Image Locally
-
-1. Modify the Dockerfile to use CPU-only mode by changing the CMD line:
-```dockerfile
-CMD ["python3", "main.py", "--listen", "0.0.0.0", "--port", "8188", "--cpu"]
-```
-
-2. Build the image for your platform:
-
-**macOS/Linux (amd64)**:
-```bash
-docker buildx build --platform=linux/amd64 -t comfyui:latest .
-```
-
-**Windows**:
-```powershell
-docker build -t comfyui:latest .
 ```
 
 ### Running the Container
