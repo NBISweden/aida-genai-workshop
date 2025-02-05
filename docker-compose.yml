@@ -2,7 +2,7 @@ version: '3'
 
 services:
   comfyui:
-    image: hale0007/comfyui-cuda12.4.1
+    image: comfyui:latest
     user: root
     ports:
       - "8188:8188"
