@@ -41,7 +41,7 @@ docker run -it --gpus all \
   comfyui
 ```
 
-## Docker pipeline
+## Docker workflow
 
 ### Building the Image Locally
 
