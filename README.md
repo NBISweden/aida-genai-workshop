@@ -21,12 +21,19 @@ sudo mount 10.39.196.133:/shared_folder /mnt/shared_folder
 docker run --rm --gpus all nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04 nvidia-smi
 ```
 
-2. Build the Docker image:
+2. Clone this repository:
+```bash
+git clone https://github.com/NBISweden/aida-genai-workshop.git
+cd aida-genai-workshop
+git branch docker-comfyui
+```
+
+3. Build the Docker image:
 ```bash
 docker build -t comfyui .
 ```
 
-3. Run the container with NFS mount:
+4. Run the container with NFS mount:
 ```bash
 docker run -it --gpus all \
   -p 8188:8188 \
