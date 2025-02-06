@@ -1,6 +1,18 @@
 # aida-genai-workshop
 Workshop files for the AIDA Data Hub Generative AI workshop
 
+## VSCode Setup for Verdi/DSP System
+1. Install Remote SSH extension in VSCode
+2. Open VSCode Settings (File > Preferences > Settings / Code > Settings ... > Settings)
+3. Search for and modify these settings:
+```json
+{
+    "remote.SSH.showLoginTerminal": true,
+    "remote.SSH.useLocalServer": false,
+    "remote.SSH.enableAgentForwarding": true
+}
+```
+
 ## NFS Setup
 1. Install NFS client:
 ```bash
