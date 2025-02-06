@@ -142,3 +142,114 @@ sudo docker load < /mnt/shared_folder/comfyui-custom.tar
 ```bash
 sudo docker compose up
 ```
+
+## Understanding Multi-stage Builds
+
+The development Dockerfile (Dockerfile.dev) uses multi-stage builds with the following stages:
+- `base`: Sets up the basic Ubuntu environment with system dependencies
+- `pytorch`: Installs PyTorch with CUDA support
+- `comfyui`: Installs ComfyUI and its dependencies
+
+### Multi-stage Build Flow
+
+```mermaid
+graph TD
+    A[nvidia/cuda base image] --> B[base stage]
+    B --> C[pytorch stage]
+    C --> D[comfyui stage]
+    
+    subgraph "Base Stage"
+    B -- "Installs" --> B1[System Packages]
+    B -- "Sets up" --> B2[SSL Certificates]
+    B -- "Configures" --> B3[Locale & Environment]
+    end
+    
+    subgraph "PyTorch Stage"
+    C -- "Installs" --> C1[PyTorch + CUDA]
+    C -- "Installs" --> C2[torchvision]
+    C -- "Installs" --> C3[torchaudio]
+    end
+    
+    subgraph "ComfyUI Stage"
+    D -- "Clones" --> D1[ComfyUI Repository]
+    D -- "Installs" --> D2[Python Dependencies]
+    D -- "Creates" --> D3[Non-root User]
+    D -- "Exposes" --> D4[Port 8188]
+    end
+    
+    style A fill:#f9f,stroke:#333
+    style B fill:#bbf,stroke:#333
+    style C fill:#bfb,stroke:#333
+    style D fill:#feb,stroke:#333
+```
+
+### Building Specific Stages
+
+1. Build up to a specific stage:
+```bash
+# Build only up to the base stage
+docker build -f Dockerfile.dev --target base -t comfyui:base .
+
+# Build up to pytorch stage
+docker build -f Dockerfile.dev --target pytorch -t comfyui:pytorch .
+```
+
+2. Resume building from a stage:
+```bash
+# If previous build failed at pytorch stage
+docker build -f Dockerfile.dev --cache-from comfyui:base --target pytorch -t comfyui:pytorch .
+```
+
+### Handling Build Failures
+
+If a build fails at a specific stage:
+- Changes before the failing stage are cached
+- You can debug the failing stage by creating a temporary container:
+```bash
+# If build fails at pytorch stage
+docker run -it comfyui:base bash
+# Now you can manually test the pytorch installation commands
+```
+
+### Best Practices for Multi-stage Builds
+
+1. Tag intermediate stages for faster rebuilds:
+```bash
+# Tag the base image
+docker build -f Dockerfile.dev --target base -t comfyui:base .
+# Use the tagged base for subsequent builds
+docker build -f Dockerfile.dev --cache-from comfyui:base -t comfyui:latest .
+```
+
+2. Use stage dependencies efficiently:
+```bash
+# Build multiple tags in one command
+docker build -f Dockerfile.dev \
+  --target base -t comfyui:base \
+  --target pytorch -t comfyui:pytorch \
+  --target comfyui -t comfyui:latest .
+```
+
+3. Pushing Specific Stages to Registry:
+```bash
+# Tag and push base stage
+docker build -f Dockerfile.dev --target base -t registry.example.com/comfyui:base .
+docker push registry.example.com/comfyui:base
+
+# Tag and push pytorch stage
+docker build -f Dockerfile.dev --target pytorch -t registry.example.com/comfyui:pytorch .
+docker push registry.example.com/comfyui:pytorch
+
+# Push multiple stages in one build
+docker build -f Dockerfile.dev \
+  --target base -t registry.example.com/comfyui:base \
+  --target pytorch -t registry.example.com/comfyui:pytorch \
+  --target comfyui -t registry.example.com/comfyui:latest .
+docker push registry.example.com/comfyui:base
+docker push registry.example.com/comfyui:pytorch
+docker push registry.example.com/comfyui:latest
+
+# Pull and use specific stage later
+docker pull registry.example.com/comfyui:pytorch
+docker build -f Dockerfile.dev --cache-from registry.example.com/comfyui:pytorch -t comfyui:latest .
+```
